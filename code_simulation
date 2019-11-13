@@ -14,6 +14,8 @@ contactb = detecteur de contact pince bas                         contactb = 0  
 
 contactf = detecteur de contact final (en bas)
 
+Test
+
 """
 
 BON_SENS = 1
