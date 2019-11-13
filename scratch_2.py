@@ -14,39 +14,36 @@ contactb = detecteur de contact pince bas                         contactb = 0  
 
 contactf = detecteur de contact final (en bas)
 
-
-Test
-
-Deuxième test
 """
 
 BON_SENS = 1
 ARRET = 0
-SENS_INVERSE = 1
+SENS_INVERSE = -1
 
 positionh = 5
 positionb = 0
-echelle = ['B', '', '', '', '', 'H', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '',
+
+
+echelle = ['','', '', '', '', '|','', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '',
            '', '', '', '|', '', '', '', '', '_', '|']
-echellefixe = (
-'', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '',
-'|', '', '', '', '', '', '|')
+
+echellefixe = ('','', '', '', '', '|','', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '',
+           '', '', '', '|', '', '', '', '', '_', '|')
+
 
 
 class servomoteur:
     def __init__(self):
-        self.volt = 0
+        self.angle = 0
 
-    def voltage(self, volt):
-        self.volt = volt
+    def rotation(self, a):
+        self.angle += a
 
-    def rotation(self, angle):
-        volt = angle
-        self.volt += volt
+
+
 
 class moteur:
     def __init__(self):
-        self.volt = 0
         self.etat = 0
 
     def tourner(self, sens):
@@ -54,6 +51,8 @@ class moteur:
 
     def stop(self):
         self.etat = ARRET
+
+
 
 
 class capteur:
@@ -67,6 +66,7 @@ class capteur:
 
 
 
+
 class robot:
     def __init__(self):
         self.mp = moteur()
@@ -74,68 +74,72 @@ class robot:
         self.mb = servomoteur()
         self.cib = capteur(False, positionb)
         self.cih = capteur(False, positionh)
-        """"self.ci_haut ="""
         self.cch = capteur(True, positionh)
         self.ccb = capteur(True, positionb)
-        """""self.cc_haut =
-        self.cc_bas = """
+        self.ci_haut = capteur(False, positionh + 1)
+        self.cc_haut = capteur(False, positionh + 1)
+        self.cc_bas = capteur(False, positionb - 1)
 
-
-    def monterhaut():
-        """
-            fonction qui decroche ,
-            fait monter la pince du haut,
-            s'arrête lorsque le detecteur IR
-            capte une barre et s'accroche
-            dessus
-            """
+    def mouvement_haut(self, n,positionh):
         self.mh.rotation(-90)
-        """echelle[position] = 'h'
-        printechelle(echelle)"""
+        
+        echelle[positionh] = 'h'
+        printechelle(echelle)
+        
         self.mp.tourner(BON_SENS)
-        self.ch.position += 1
+        self.ch.position += n
         while not self.ch.detecte():
-            self.ch.position += 1
-            """echelle[position] = 'h'
-            echelle[position - 1] = echellefixe[position - 1]
+
+            echelle[positionh] = 'h'
+            echelle[positionh - 1] = echellefixe[positionh - 1]
             printechelle(echelle)
-            position += volt"""
+            
+            self.ch.positionh += n
+            positionh += volt
         self.mp.stop()
         self.mh.rotation(90)
-        """echelle[position - 1] = 'H'
-        printechelle(echelle)"""
+        
+        echelle[positionh - 1] = 'H'
+        printechelle(echelle)
 
-    def monterbas(position, volt):
+    def mouvement_bas(self, n,positionb):
         self.mb.rotation(-90)
-        '''echelle[position] = 'b'
-        printechelle(echelle)'''
+        
+        echelle[positionb] = 'b'
+        printechelle(echelle)
+        
         self.mp.tourner(BON_SENS)
+        self.cb.positionb += n
         while not self.cb.detecte():
-            """echelle[position] = 'b'
-            echelle[position - 1] = echellefixe[position - 1]
-            printechelle(echelle)"""
-            self.cb.position += 1
+            
+            echelle[positionb] = 'b'
+            echelle[positionb - 1] = echellefixe[positionb - 1]
+            printechelle(echelle)
+            
+            self.cb.positionb += n
         self.mp.stop()
         self.mb.rotation(90)
-        """echelle[position - 1] = 'B'
-        printechelle(echelle)"""
+        
+        echelle[positionb - 1] = 'B'
+        printechelle(echelle)
 
     def montee(self):
-        """while not self.ci_haut.state:
-            self.monterhaut()
-            self.monterbas()"""
+        while not (self.ci_haut.detecte() or self.cc_haut.detecte()):
+            self.mouvement_haut(1,positionh)
+            self.mouvement_bas(1,positionb)
+        print("Fin de la montée")
 
+    def descente(self):
+        while not (self.cc_bas.detecte()):
+            self.mouvement_bas(1,positionh)
+            self.mouvement_haut(1,positionb)
+        print("Fin de la descente")
 
-     """def printechelle(echelle):
-        for i in len(echelle):
-            print(i, end=' ')
-        print('\n')"""
-
-
-
-
-
-"""robot.printechelle(echelle)
-
-robot.monterhaut(positionh, 1)
-robot.monterbas(positionb, 1)"""
+def printechelle(echelle):
+    for i in echelle:
+        print(i, end=' ')
+        print('\n')
+    
+    
+robot = robot()
+robot.montee()
