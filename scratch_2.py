@@ -16,6 +16,8 @@ contactf = detecteur de contact final (en bas)
 
 
 Test
+
+Deuxième test
 """
 
 BON_SENS = 1
