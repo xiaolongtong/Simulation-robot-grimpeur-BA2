@@ -134,7 +134,7 @@ class robot:
         echelle[self.position_bas] = 'b'
         print(echelle , "\n")
 
-        self.mp.tourner(BON_SENS)
+        self.mp.tourner(SENS_INVERSE)
         self.cib.position += n
         self.ccb.position += n
         self.cc_bas.position += n
