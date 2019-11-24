@@ -1,0 +1,68 @@
+
+from tkinter import *
+LARGEUR= 400
+HAUTEUR = 400
+taille_echelon=LARGEUR//2
+position_echelle=LARGEUR//4
+nombre_echelon=8
+taille_carre=20
+distance_echelon=HAUTEUR//(nombre_echelon)
+dt=20#temps d'attente entre 2 appels a la fonction(en millisecondes)
+
+
+root = Tk()
+canvas= Canvas(root, width=LARGEUR, height= HAUTEUR, background= "white")
+canvas.pack(fill="both",expand=True)
+x0=LARGEUR//2-taille_carre//2#pour centrer le carre
+y0=distance_echelon//2
+dx=0#pas de deplacement selon x
+dy=1 #on avance de 1 en 1 pour pouvoir reperer precisement la coordonnee de l'echelon, si on veut modifier la vitesse
+#on modifie dt
+run=False#qu debut pas de mvmt
+
+for i in range (nombre_echelon):
+    y=(i+1)*(distance_echelon)-(distance_echelon)//2#i+1 pour ne pas avoir d'echelon en 0 et fois la distance entre chaque echelon
+    #pour separer les echelons de la meme distance avec le for
+    #jenleve la moitie de la distance entre chaque echelon pour decaler tous les echelons et les centrer
+    bras=canvas.create_line(position_echelle,y,position_echelle+taille_echelon,y,width=2,fill="blue")
+
+bras=canvas.create_rectangle(x0,y0,x0+taille_carre,y0+taille_carre,width=2,fill="red")
+baserob= canvas.create_rectangle(x0,y0+distance_echelon,x0+taille_carre,y0+distance_echelon+taille_carre,width=2,fill="blue")
+obj=[baserob,bras]
+tour=0#determine quel carre va se deplacer
+marche=3#echelon auquel il doit aller
+
+def deplacer():
+    global  dy,tour,marche
+    canvas.move(obj[tour],0,dy)#on bouge l'element a qui est le tour
+    y=canvas.coords(obj[tour])[1]#coordonnee y du point en haut a gauche du carre
+    if y==marche*distance_echelon-distance_echelon//2  - distance_echelon*tour:#si y= yechelon pour baserob on l'arrete
+        #on fait fois tour car si cest au tour des bras ils doivent sarreter au dessus de l'echelle
+        #donc il faut enlever la taille du carre au y des bras
+
+        if (tour and dy==1) or (not tour and dy==-1):#une fois que bras a aussi atteint l'echelle on change marche
+            if marche == nombre_echelon or marche == 1:  # si les 2 sont arrives tout en bas ou tout e haut
+                dy *= -1
+                tour = not tour
+            marche+=1*dy#car dy vaut 1 dans la descente et -1 dans la montee
+            #qd on monte on part de l'echelon 8 et on va vers le 1
+        tour = not tour
+
+    if run:
+        canvas.after(dt,deplacer)
+
+
+
+def action_deplacer():
+    global run
+    run = not run
+    if run:
+        deplacer()
+
+#boutons
+bouton_couleur=Button(root,text="Déplacer", width=20, command=action_deplacer)
+bouton_couleur.pack(pady=10)
+
+bouton_quitter=Button(root,text="Quitter",width=20,command=root.quit)
+bouton_quitter.pack(side=BOTTOM,pady=10)
+root.mainloop()
