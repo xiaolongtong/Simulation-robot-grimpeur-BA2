@@ -1,0 +1,192 @@
+void setup() {
+  /*
+   * ATTRIBUTION DES VALEURS
+
+mh = moteur pince du haut                                         mh = -1  ==> moteur allumé dans sens inverse
+mb = moteur pince du bas                                          mb = 0   ==> moteur éteint
+mp = moteur principal                                             mp = 1   ==> moteur allumé
+
+
+deth = detecteur IR du haut                                       deth = 0  ==> detecteur capte rien    (True False ?)
+detb = detecteur IR du bas                                        detb = 1  ==> detecteur capte qqch
+
+contacth = detecteur de contact pince haut                        contacth = 1  ==> la pince du haut est accrochée
+contactb = detecteur de contact pince bas                         contactb = 0  ==> la pince du bas n'est pas accrochée
+
+contactf = detecteur de contact final (en bas)
+
+   */
+
+
+  *\
+#include <accessories>
+#include <list>
+#include <string>
+int BON_SENS(1);
+int ARRET(0);
+int SENS_INVERSE(-1);
+
+int positionh(5);
+int positionb(0);
+
+auto echelle = std::list<std::string> {
+  '','', '', '', '', '|','', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '',
+           '', '', '', '|', '', '', '', '', '_', '|'
+};
+
+auto echellefixe = std::list<std::string> {
+  '','', '', '', '', '|','', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '', '', '', '', '|', '', '',
+           '', '', '', '|', '', '', '', '', '_', '|'
+};
+
+
+
+class Servomoteur:
+{
+    private:
+    Servomoteur::Servomoteur();
+    {
+      int angle=0;
+    }
+    public:
+    void RotationServomoteur(int angle,int a)
+    {
+      angle+=a
+    };
+      
+
+};
+
+
+class Moteur:
+ {
+    private:
+    Moteur::Moteur();
+    {
+      int etat=0;
+    }
+    public:
+    void Tourner(int etat, int sens)
+    {
+      int etat=sens;
+    }
+    void Stop(int etat)
+    {
+      int etat=ARRET
+    }
+}
+
+
+
+class Capteur:
+{
+    private:
+    Capteur::Capteur();
+    {
+      int position=position;
+    }
+    public:
+    void Detecter(int position)
+    {
+      return char (list echelle[position])= "|")
+    }
+}
+
+
+class Robot:
+{
+    private:
+    Robot::Robot();
+    {
+        mp = moteur();                                        /*je ne connais pas le genre de ces attributs*/
+        mh = servomoteur();
+        mb = servomoteur();
+        cib = capteur(bool false, int positionb);
+        cih = capteur(bool false,int positionh);
+        cch = capteur(bool true,int positionh);
+        ccb = capteur(bool true,int positionb);
+        ci_haut = capteur(bool false,int (positionh + 1));
+        cc_haut = capteur(bool false,int(positionh + 1));
+        cc_bas = capteur(bool false,int( positionb - 1));
+                                             
+    }
+    
+    public:
+    void Mouvement_Haut(int n, int positionh)
+    {
+      
+    }
+    
+    
+    
+    def mouvement_haut(self, n,positionh):
+        self.mh.rotation(-90)
+
+        echelle[positionh] = 'h'
+        printechelle(echelle)
+
+        self.mp.tourner(BON_SENS)
+        self.ch.position += n
+        while not self.ch.detecte():
+
+            echelle[positionh] = 'h'
+            echelle[positionh - 1] = echellefixe[positionh - 1]
+            printechelle(echelle)
+
+            self.ch.positionh += n
+            positionh += volt
+        self.mp.stop()
+        self.mh.rotation(90)
+
+        echelle[positionh - 1] = 'H'
+        printechelle(echelle)
+
+    def mouvement_bas(self, n,positionb):
+        self.mb.rotation(-90)
+
+        echelle[positionb] = 'b'
+        printechelle(echelle)
+
+        self.mp.tourner(BON_SENS)
+        self.cb.positionb += n
+        while not self.cb.detecte():
+
+            echelle[positionb] = 'b'
+            echelle[positionb - 1] = echellefixe[positionb - 1]
+            printechelle(echelle)
+
+            self.cb.positionb += n
+        self.mp.stop()
+        self.mb.rotation(90)
+
+        echelle[positionb - 1] = 'B'
+        printechelle(echelle)
+
+    def montee(self):
+        while not (self.ci_haut.detecte() or self.cc_haut.detecte()):
+            self.mouvement_haut(1,positionh)
+            self.mouvement_bas(1,positionb)
+        print("Fin de la montée")
+
+    def descente(self):
+        while not (self.cc_bas.detecte()):
+            self.mouvement_bas(1,positionh)
+            self.mouvement_haut(1,positionb)
+        print("Fin de la descente")
+
+def printechelle(echelle):
+    for i in echelle:
+        print(i, end=' ')
+        print('\n')
+
+
+
+
+}
+
+void loop() {
+  robot = robot()
+robot.montee()
+  // 
+
+}
