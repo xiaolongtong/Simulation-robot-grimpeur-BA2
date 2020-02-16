@@ -2,6 +2,7 @@
 
 //On définit ici ce qui suit par souci de clarté (pour éviter d'avoir directement des valeurs 1,2,3,... ou A1, A2,... dans le code, ce qui serait très galère chaque fois qu'on refait le circuit.
 //Du coup ça permet de voir directement qu'est ce qui correspond à quoi
+
 #define INFRA_HAUT A0
 #define INFRA_BAS A1
 #define INFRA_CIEL A2
@@ -11,15 +12,21 @@
 #define CONTACT_CIEL 5
 #define CONTACT_TERRE 6
 
-//Haut et bas --> concernent ce qui se passe au niveau des pinces
-//Ciel et terre --> concernent ce qui se passe au niveau des extrémités du robot (tout en haut / tout en bas)
+//                                    Haut et bas --> concerne ce qui se passe au niveau des pinces
+//                                    Ciel et terre --> concerne ce qui se passe au niveau des extrémités du robot (tout en haut / tout en bas)
 
 
-Servo moteur_principal;
+Servo moteur_principal;    //moteur à rotation continue
 Servo pince_bas;
 Servo pince_haut;
 
 const int LIMITE_INFRA = 100;  //on dira que quand le capteur mesure une valeur inférieure à ce seuil, c'est qu'il est en train de détecter
+
+const int LIMITE_ROTATION_PINCE = 100;   //c'est un seuil qui ne sera pas dépassé pour la rotation des pinces (--> permet d'éviter des dégradations à cause d'une rotation trop grande,
+//                                                                                                             par exemple si la pince est bien sur l'échelon mais le contact n'est pas détecté)
+
+const int t =60;  //sera utilisé dans les delay(...) , un temps t sera attendu avant chaque itération dans les boucles (utilisé pour les rotations des petits servos) --> contrôle sur la vitesse de rotation
+
 
 
 void setup() {  // exécuté une seule fois au tout début --> en gros on dit à l'Arduino ce qui se trouve à chacun de ses pins
@@ -46,17 +53,59 @@ void setup() {  // exécuté une seule fois au tout début --> en gros on dit à
 
 void loop() { //répété en boucle
 
-  //Booléens liés aux capteurs pour voir s'ils détectent ou pas
-  boolean detecte_infra_haut = analogRead(INFRA_HAUT) > LIMITE_INFRA;
-  boolean detecte_infra_bas = analogRead(INFRA_BAS) > LIMITE_INFRA;
-  boolean detecte_infra_ciel = analogRead(INFRA_CIEL) > LIMITE_INFRA;
+  //Booléens liés aux capteurs pour voir s'ils détectent ou pas :                  si c'est true, le capteur est en train de détecter
+  boolean detecte_infra_haut = analogRead(INFRA_HAUT) < LIMITE_INFRA;
+  boolean detecte_infra_bas = analogRead(INFRA_BAS) < LIMITE_INFRA;
+  boolean detecte_infra_ciel = analogRead(INFRA_CIEL) < LIMITE_INFRA;
   boolean detecte_contact_haut = digitalRead(CONTACT_HAUT);
   boolean detecte_contact_bas = digitalRead(CONTACT_BAS);
   boolean detecte_contact_ciel = digitalRead(CONTACT_CIEL);
   boolean detecte_contact_terre = digitalRead(CONTACT_TERRE);
 
-  // CODE PRINCIPAL
+  // CODE PRINCIPAL si le rebot commence en bas --> montée simple
 
+  if(detecte_contact_bas){      // MOUVEMENT DE LA PARTIE "HAUT"
+    int rotation_ph = 90;
+    for(rotation_ph = 90; rotation_ph > 0; rotation_ph--)  //valeurs peut-être fausses, à déterminer quand on fera des tests
+    {
+      pince_haut.write(rotation_ph);          //ici .write(angle) permet que le servo aille à un angle précis (ce ne sera pas pareil pour le moteur principal, qui est à rotation continue)
+      delay(t);
+    }                           //ce for permet de décrocher la pince
+    
+    while(!detecte_infra_haut){     //ce while permet que le moteur tourne tant que l'échelon n'est pas détecté
+      moteur_principal.write(0);  // !!!!!!!!!!!!!!!! peut-être à changer en 180, faudra voir ça aux tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!   
+    }                           //la fonction .write(...) permet que ça tourne en continu dans un sens, l'argument permet de contrôler la vitesse (0 pour un sens, 180 pour l'autre, 94 pour l'arrêt) (pas pareil que pour les petits servos!)
+                                 
+    moteur_principal.write(94);  // stoppe le moteur principal (94 est la valeur d'arrêt)
+    
+    //                              pour plus de précision on peut utiliser .writeMicrosecond()
+    
+    while( ! detecte_contact_haut or rotation_ph <= LIMITE_ROTATION_PINCE ){  //ce while permet que la pince tourne tant que le contact avec l'échelon n'est pas détecté
+      pince_haut.write(rotation_ph);
+      rotation_ph+=1;
+      delay(t);                                //petit t --> grande vitesse de rotation
+    }
+  }
+  //                           A AJOUTER : faire en sorte que tout s'arrête si rotation_ph dépasse la limite
   
+  if(detecte_contact_bas){       //MOUVEMENT DE LA PARTIE "BAS", la logique est exactement la même que pour la partie du haut
+    int rotation_pb = 90;
+    for(rotation_pb = 90; rotation_pb > 0; rotation_pb--)  //valeurs peut-être fausses, à déterminer quand on fera des tests
+    {
+      pince_bas.write(rotation_pb);
+      delay(t);
+    }
+    
+    while(!detecte_infra_bas){     
+      moteur_principal.write(180);           // Le moteur principal tourne dans l'autre sens
+    }
+    moteur_principal.write(94);
+    
+    while( ! detecte_contact_bas or rotation_pb <= LIMITE_ROTATION_PINCE ){  
+      pince_bas.write(rotation_pb);
+      rotation_pb+=1;
+      delay(t);
+    }  
+  }
 
 }
