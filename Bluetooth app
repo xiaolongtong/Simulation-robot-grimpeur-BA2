@@ -1,0 +1,21 @@
+initialize global(Recived_data)to("")
+
+when ListPicker1.BeforePicking                                                            //Sert avoir les adresses bluetooth
+do set ListPicker1.Elements to BLuetoothClient1.AdressesAndNames
+
+
+when listPicker1.AfterPicking                                                             //Sert à se conecter au module
+do set ListPicker1.Selection to call BluetoothClient1.Connect
+                                                      adress ListPicker1.selection
+                                                      
+when clock.Timer                                                                          //En gros on recoit un text que l'on transforme en liste (on cree la liste separant le text à la virgule) puis on affiche les items sur des cases prevues sur l'app (case 2 et 5)  
+do if BluetoothClient1.IsConnected
+    then if call BluetoothClient1.BytesAvaibleToReceive>0
+          then set global Recived_data to split text call Bluetooth.Client1.ReceiveText
+                                                                          numberOfBytes call BLuetoothClient1.BytesAvaibleToReceive
+                                                                          
+                                                 at ","
+               set Label2.Text to select list items list get global Recived_data
+                                                             index 1
+               set Label5.Text to select list items list get global Recived_data
+                                                             index 2
