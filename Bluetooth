@@ -1,1 +1,31 @@
+#include <SoftwareSerial.h>                                  // normalment on a un seul pin rx et un tx mais grace à cette ligne de code 
+                                                                on peut permettre à dautres pins digitales de faire la même chose.
 
+SoftwareSerial ROBOT_SOLIDE(10, 11);                        //10=RX et 11=TX 
+String etat = "";
+String val = "";
+int ir_pin = 8;                                             // C'est la pins que j'ai utilisé pour recuperer l'information d'un capteur 
+                                                               infrarouge
+void setup(){                                               // pin 8 capteur et pour le module bluetooth il faut une vitesse de 
+                                                               transmission de 38400 baud
+  pinMode(ir_pin,INPUT);
+  ROBOT_SOLIDE.begin(38400);
+}
+
+void loop() {
+  int valeur = digitalRead(ir_pin);
+    if (valeur == 0) {  
+      etat = "Arrivé en bas";
+      val = "1";
+      ROBOT_SOLIDE.print("1,Arrivé en bas");                //il suffit d'utiliser .print() pour renvoyer un text au module
+                                                              on aurait pu ecrire (val + "," +  etat) 
+      delay(1000);                                       
+  }
+    else if( valeur == 1) {
+      etat = "Je sais pas";                                 //ici il faudra ecrire une fonction pour savoir si on descend ou on monte
+      val = "0";
+      ROBOT_SOLIDE.print("0, Je sais pas");
+      delay(1000);
+  }
+
+}
