@@ -82,7 +82,7 @@ void loop() { //répété en boucle
       detecte_infra_ciel = analogRead(INFRA_CIEL) < LIMITE_INFRA;
     }                           //la fonction .write(...) permet que ça tourne en continu dans un sens, l'argument permet de contrôler la vitesse (0 pour un sens, 180 pour l'autre, 94 pour l'arrêt) (pas pareil que pour les petits servos!)
                                  
-    moteur_principal.write(94);  // on stoppe d'office le moteur
+    moteur_principal.writeMicrosecond(1510);  // on stoppe d'office le moteur
     
     //                              pour plus de précision on peut utiliser .writeMicrosecond()
     
@@ -109,7 +109,7 @@ void loop() { //répété en boucle
         while(!detecte_infra_bas){             //!!!!!!!!!! A ajouter : detecte_contact_terre !!!!!!!!!!!!! 
           detecte_infra_bas = analogRead(INFRA_BAS) < LIMITE_INFRA;
         }
-        moteur_principal.write(94);
+        moteur_principal.writeMicrosecond(1510);
         detecte_contact_bas = (digitalRead(CONTACT_BAS) == 1);
         while( ! detecte_contact_bas or rotation_pb <= LIMITE_ROTATION_PINCE ){  
           pince_bas.write(rotation_pb);
