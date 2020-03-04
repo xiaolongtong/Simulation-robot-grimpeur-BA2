@@ -57,12 +57,12 @@ void loop() { //répété en boucle
   boolean detecte_infra_haut;
   boolean detecte_infra_bas;
   boolean detecte_infra_ciel = analogRead(INFRA_CIEL) < LIMITE_INFRA;
-  boolean detecte_contact_haut = digitalRead(CONTACT_HAUT);
-  boolean detecte_contact_bas = digitalRead(CONTACT_BAS);
-  boolean detecte_contact_ciel = digitalRead(CONTACT_CIEL);
-  boolean detecte_contact_terre = digitalRead(CONTACT_TERRE);
+  boolean detecte_contact_haut = (digitalRead(CONTACT_HAUT) == 1);
+  boolean detecte_contact_bas = (digitalRead(CONTACT_BAS) == 1);
+  boolean detecte_contact_ciel = (digitalRead(CONTACT_CIEL) == 1);
+  boolean detecte_contact_terre = (digitalRead(CONTACT_TERRE) == 1);
 
-  // CODE PRINCIPAL si le rebot commence en bas --> montée simple
+  // CODE PRINCIPAL si le robot commence en bas --> montée simple
 
   if(detecte_contact_bas){      // MOUVEMENT DE LA PARTIE "HAUT"
     int rotation_ph = 90;
@@ -71,44 +71,53 @@ void loop() { //répété en boucle
       pince_haut.write(rotation_ph);          //ici .write(angle) permet que le servo aille à un angle précis (ce ne sera pas pareil pour le moteur principal, qui est à rotation continue)
       delay(t);
     }                           //ce for permet de décrocher la pince
+    
     detecte_infra_haut = false;
-    moteur_principal.write(0);  // !!!!!!!!!!!!!!!! peut-être à changer en 180, faudra voir ça aux tests !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    while(!detecte_infra_haut){     //ce while permet que le moteur tourne tant que l'échelon n'est pas détecté  
+    moteur_principal.write(0);
+    //delay(1000);
+    
+    while(!(detecte_infra_haut or detecte_infra_ciel or detecte_contact_ciel)){     //le moteur tourne tant que l'échelon n'est pas détecté et tant qu'il n'y a pas de problème
       detecte_infra_haut = analogRead(INFRA_HAUT) < LIMITE_INFRA; 
+      detecte_contact_ciel = (digitalRead(CONTACT_CIEL) == 1);
+      detecte_infra_ciel = analogRead(INFRA_CIEL) < LIMITE_INFRA;
     }                           //la fonction .write(...) permet que ça tourne en continu dans un sens, l'argument permet de contrôler la vitesse (0 pour un sens, 180 pour l'autre, 94 pour l'arrêt) (pas pareil que pour les petits servos!)
                                  
-    moteur_principal.write(94);  // stoppe le moteur principal (94 est la valeur d'arrêt)
+    moteur_principal.write(94);  // on stoppe d'office le moteur
     
     //                              pour plus de précision on peut utiliser .writeMicrosecond()
-
-    detecte_contact_haut = digitalRead(CONTACT_HAUT);    
-    while( ! detecte_contact_haut or rotation_ph <= LIMITE_ROTATION_PINCE ){  //ce while permet que la pince tourne tant que le contact avec l'échelon n'est pas détecté
-      pince_haut.write(rotation_ph);
-      rotation_ph+=1;
-      detecte_contact_haut = digitalRead(CONTACT_HAUT);
-      delay(t);                                //petit t --> grande vitesse de rotation
+    
+    if(!(detecte_contact_ciel or detecte_infra_ciel)){  //ne sera pas lu si un problème est survenu (--> si c'est le cas, retour en début de loop)
+      
+      //pince_haut.write(100);                !!!!!!!!!!!!! à vérifier !!!!!!!!!!!
+      detecte_contact_haut = (digitalRead(CONTACT_HAUT) == 1);   
+      while( ! detecte_contact_haut or rotation_ph <= LIMITE_ROTATION_PINCE ){  //ce while permet que la pince tourne tant que le contact avec l'échelon n'est pas détecté
+        pince_haut.write(rotation_ph);
+        rotation_ph+=1;
+        detecte_contact_haut = (digitalRead(CONTACT_HAUT) == 1);
+        delay(t);                                //petit t --> grande vitesse de rotation
+      }
+      if(detecte_contact_haut){       //MOUVEMENT DE LA PARTIE "BAS", la logique est exactement la même que pour la partie du haut
+        int rotation_pb = 90;
+        for(rotation_pb = 90; rotation_pb > 0; rotation_pb--)  //valeurs peut-être fausses, à déterminer quand on fera des tests
+        {
+          pince_bas.write(rotation_pb);
+          delay(t);
+        }
+        detecte_infra_bas = false;
+        moteur_principal.write(180);           // Le moteur principal tourne dans l'autre sens
+        //delay(1000);
+        while(!detecte_infra_bas){             //!!!!!!!!!! A ajouter : detecte_contact_terre !!!!!!!!!!!!! 
+          detecte_infra_bas = analogRead(INFRA_BAS) < LIMITE_INFRA;
+        }
+        moteur_principal.write(94);
+        detecte_contact_bas = (digitalRead(CONTACT_BAS) == 1);
+        while( ! detecte_contact_bas or rotation_pb <= LIMITE_ROTATION_PINCE ){  
+          pince_bas.write(rotation_pb);
+          rotation_pb+=1;
+          detecte_contact_bas = (digitalRead(CONTACT_BAS) == 1);
+          delay(t);
+        }  
+      }
     }
-  }
-  //                           A AJOUTER : faire en sorte que tout s'arrête si rotation_ph dépasse la limite
-  
-  if(detecte_contact_haut){       //MOUVEMENT DE LA PARTIE "BAS", la logique est exactement la même que pour la partie du haut
-    int rotation_pb = 90;
-    for(rotation_pb = 90; rotation_pb > 0; rotation_pb--)  //valeurs peut-être fausses, à déterminer quand on fera des tests
-    {
-      pince_bas.write(rotation_pb);
-      delay(t);
-    }
-    detecte_infra_bas = false;
-    moteur_principal.write(180);           // Le moteur principal tourne dans l'autre sens
-    while(!detecte_infra_bas){     
-      detecte_infra_bas = analogRead(INFRA_BAS) < LIMITE_INFRA;
-    }
-    moteur_principal.write(94);
-    detecte_contact_bas = digitalRead(CONTACT_BAS);
-    while( ! detecte_contact_bas or rotation_pb <= LIMITE_ROTATION_PINCE ){  
-      pince_bas.write(rotation_pb);
-      rotation_pb+=1;
-      delay(t);
-    }  
-  }
-}
+  }   
+}     //                           A AJOUTER : faire en sorte que tout s'arrête si rotation_ph dépasse la limite   
