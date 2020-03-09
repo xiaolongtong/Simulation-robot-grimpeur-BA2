@@ -1,0 +1,87 @@
+// --- Montée x1 ---
+
+// Ce code simule la montée d'une pince (haut mais ds le code ca sera écrit bas paske flemme de tt changer)
+// Il va retirer la pince lorsque il y a contact
+// Il va monter, s'arretter quand infra ok
+// Il va remettre la pince sur lechelon jusua ce que contact ok
+// Il va monter tte la partie du bas ^dnt 1 sec puis fin du programme
+
+
+
+#include <Servo.h>
+
+#define CONTACT_BAS 4
+#define INFRA_BAS A1
+
+Servo moteur_principal;
+Servo pince_bas;
+
+int accroche = 0;
+
+void setup() {
+
+  moteur_principal.attach(0);
+  pince_bas.attach(1);
+
+  pinMode(INFRA_BAS, INPUT);
+
+  pinMode(CONTACT_BAS,INPUT);
+
+
+}
+
+void loop() {
+
+  boolean detecte_infra_bas = digitalRead(INFRA_BAS);
+  int detecte_contact_bas = digitalRead(CONTACT_BAS);
+  int pos = pince_bas.read();
+
+if(detecte_contact_bas == 1) {
+  int but = pos + 90;
+  while(pos < but){
+    pince_bas.write(pos);
+    pos += 1;
+    delay(25);
+  }
+  
+  accroche = 0;
+  delay(3000);
+  
+}
+
+
+
+
+if(accroche == 0){
+  while(!detecte_infra_bas){
+    moteur_principal.write(0);
+    detecte_infra_bas = digitalRead(INFRA_BAS);
+    
+  moteur_principal.write(94);
+
+  delay(3000);
+    }
+  }
+
+
+
+if(detecte_infra_bas){
+  int but = pos - 90;
+  while(pos > but or detecte_contact_bas == 1){
+    pince_bas.write(pos);
+    pos += 1;
+    delay(25);
+    detecte_contact_bas = digitalRead(CONTACT_BAS);
+    }
+  accroche = 2;
+  }
+
+if(accroche == 2){
+  moteur_principal.write(180);
+  delay(1000);
+  moteur_principal.write(94);
+  }
+
+  
+  
+}
