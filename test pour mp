@@ -1,0 +1,57 @@
+// --- Moteur principal ---
+
+
+
+// Par défaut le mp monte, si infra detecte alors il sarrette
+// Utiliser le contact pr le redescendre
+
+
+
+
+
+#include <Servo.h>
+
+#define INFRA_BAS A1
+
+#define CONTACT_BAS 4
+
+
+
+Servo moteur_principal;    //moteur à rotation continue
+
+
+
+
+void setup() {
+  moteur_principal.attach(0);
+
+
+  pinMode(INFRA_BAS, INPUT);
+  pinMode(CONTACT_BAS,INPUT);
+
+
+}
+
+
+
+void loop() { 
+  
+  boolean detecte_infra_bas = analogRead(INFRA_BAS);
+  boolean detecte_contact_bas = digitalRead(CONTACT_BAS);
+
+  
+
+  if(!(detecte_infra_bas))
+  { moteur_principal.write(0);}
+
+
+    
+  if(detecte_infra_bas)
+  { moteur_principal.write(94);}
+
+
+  if(detecte_contact_bas == 1)
+  { moteur_principal.write(180);}
+                       
+    
+}
