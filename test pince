@@ -1,0 +1,48 @@
+//  --- PINCES ---  //
+
+//Ce code permet de tester les pinces 
+//Par défaut va tourner de 90 °
+
+
+
+
+
+#include <Servo.h>
+
+#define CONTACT_BAS 7
+Servo pince_bas;
+
+
+int pos = 0;
+int signe = 1;
+
+
+
+void setup() {
+
+  pince_bas.attach(4);
+  pinMode(CONTACT_BAS,INPUT);
+
+}
+
+
+
+
+void loop() {
+
+  
+  
+  int detecte_contact_bas = digitalRead(CONTACT_BAS);
+  
+  if(detecte_contact_bas == 0){
+    pince_bas.write(pos);
+    pos += signe;
+    if (pos == 110)
+      {signe = -1;}
+    if (pos == 0)
+      {signe = 1;}
+    delay(10); 
+  }
+  
+
+}
